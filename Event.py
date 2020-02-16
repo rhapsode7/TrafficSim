@@ -6,7 +6,10 @@ from Vehicle import Intention
 import Intersection
 import queue
 
-DELAY = 1
+# Unit Delay. It takes one unit delay to move the car 1 unit ahead in the list
+DELAY = 0.2
+
+
 MAX_T = 50
 
 
@@ -85,14 +88,18 @@ class ExitCrossing(Event):
         # Set lane front pointer to Null and decrease the counter
         self.L.front = None
         self.L.capacity -= 1
-        # TODO: ADD THIS VEHICLE TO ANOTHER LANE
+
+        # Add the vehicle to another lane
+        sinklane = self.L.sinkLanes[self.V.intention]
+        sink = self.L.sinkLanes[self.V.intention].sink
+        self.chain(EnterLane(self.T, self.V, sink, sinklane))
 
         # if there is no more vehicle in this lane, update the tail pointer
         if self.L.capacity == 0:
             self.L.tail = None
-        # otherwise, make the follower arriving the crossing, after a small delay
+        # otherwise, make the follower arriving the crossing, after a small delay (Unit Delay)
         else:
-            self.dispatch(ArriveCrossing( self.T + DELAY, self.V.follower, self.C, self.L))
+            self.dispatch(ArriveCrossing(self.T + DELAY, self.V.follower, self.C, self.L))
 
         print("%d:::Car %d Left the Intersection %d from Lane %d, Light is %s, Intention is %s" %
               (self.T, self.V.ID, self.C.ID, self.L.ID, TrafficLightState(light.State).name, Intention(self.V.intention).name))
@@ -106,9 +113,9 @@ class EnterLane(Event):
         self.C = C
 
     def execute(self):
-        # if the lane is empty, immediately make it arrival at the crossing, after a small delay?
+        # if the lane is empty, immediately make it arrival at the crossing, after a delay that equals capacity * unit delay
         if self.L.capacity == 0:
-            self.dispatch(ArriveCrossing( self.T + DELAY, self.V, self.C, self.L))
+            self.dispatch(ArriveCrossing(self.T + DELAY * self.L.capacity, self.V, self.C, self.L))
         # otherwise update its tail
         else:
             self.L.tail.follower = self.V
