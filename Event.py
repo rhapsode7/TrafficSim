@@ -56,8 +56,12 @@ class ArriveCrossing(Event):
         print("%d:::Car %d Arrived the Intersection %d from lane %d, Light is %s, Intention is %s" %
               (self.T, self.V.ID, self.C.ID, self.L.ID, TrafficLightState(light.State).name, Intention(self.V.intention).name))
 
+        # If the the lane the vehicle is travelling to is full, add this vehicle to waitlist of the target lane
+        if self.L.sinkLanes[self.V.intention].capacity == 0:
+            self.L.sinkLanes[self.V.intention].waitlist.put_nowait(self.V)
+
         # if the vehicle can immediately pass the crossing, send a exit event
-        if self.V.intention in light.AllowedIntention[light.State] and self.L.ID in light.AllowedLanes[light.State]:
+        elif self.V.intention in light.AllowedIntention[light.State] and self.L.ID in light.AllowedLanes[light.State]:
             self.chain(ExitCrossing(self.T, self.V, self.C, self.L))
         # Otherwise find out the exit time (waitTime, wT)
         else:

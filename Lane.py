@@ -8,7 +8,7 @@ class BasicLane(object):
         self.ID = ID
         self.front: Vehicle = None
         self.tail: Vehicle = None
-        self.capacity: int = 0
+        self.capacity: int = 2 ** 31 # initialize to unlimited
         self.source: Intersection = None
         self.sink: Intersection = None
         # This is used to connect a lane to its sink and source
